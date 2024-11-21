@@ -12,10 +12,10 @@
 
 
  # upcoming presentation 3
-  #### circut and implementation
+  #### Circut and implementation
  
 
-#Task Distribution
-    ## Abstract --> Wasif
-    ## Introduction --> Adesh
-    ## Plane --> Mohit
+# Task Distribution
+    #### Abstract --> Wasif
+    ### Introduction --> Adesh
+    ### Plane --> Mohit
