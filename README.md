@@ -3,7 +3,7 @@
 # upcoming presentation 1
   #### Abstract
   #### intro
-  #### Time plane
+  #### Time plan
   #### Team organisation
 
 # upcoming presentation 2
@@ -18,4 +18,4 @@
 # Task Distribution
     #### Abstract --> Wasif
     ### Introduction --> Adesh
-    ### Plane --> Mohit
+    ### Plan --> Mohit
