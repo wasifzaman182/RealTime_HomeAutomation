@@ -1,25 +1,8 @@
- /************************************************************************************
- *  Created By: Tauseef Ahmad
- *  Created On: 4 June, 2022
- *  
- *  YouTube Video: https://youtu.be/pp_zKEZlCD8
- *  My Channel: https://www.youtube.com/channel/UCOXYfOHgu-C-UfGyDcu5sYw/
- *  
- *  *********************************************************************************
- *  Preferences--> Aditional boards Manager URLs : 
- *  For ESP32:
- *  https://dl.espressif.com/dl/package_esp32_index.json
- *  
- *  *********************************************************************************
- *  Download Blynk Library (Version 1.0.1):
- *  https://github.com/blynkkk/blynk-library
- **********************************************************************************/
-//------------------------------------------------------------------------------
 // Template ID, Device Name and Auth Token are provided by the Blynk.Cloud
 // See the Device Info tab, or Template settings
-#define BLYNK_TEMPLATE_ID "ENTER_TEMPLATE_ID"
-#define BLYNK_DEVICE_NAME "ENTER_DEVICE_NAME"
-#define BLYNK_AUTH_TOKEN "ENTER_AUTH_TOKEN"
+#define BLYNK_TEMPLATE_ID "TMPL4t8N2Vcv1"
+#define BLYNK_TEMPLATE_NAME "Home Automation"
+#define BLYNK_AUTH_TOKEN "tfRM-prCXr8cKXZBAG4M65mSKf-YGJ0v"
 //------------------------------------------------------------------------------
 //--------------------------------------------------
 #include <WiFi.h>
@@ -29,15 +12,17 @@
 // Comment this out to disable prints and save space
 #define BLYNK_PRINT Serial
 
-char auth[] = BLYNK_AUTH_TOKEN;
+char auth[] = "tfRM-prCXr8cKXZBAG4M65mSKf-YGJ0v";
 BlynkTimer timer;
 //--------------------------------------------------
 // Your WiFi Router's credentials. (or Mobile Hotspot)
 // Set password to "" for open networks.
-char ssid[] = "ENTER_WIFI_SSID";
-char pass[] = "ENTER_WIFI_PASSWORD";
+char ssid[] = "Oneplus";
+char pass[] = "asdfghjkl";
+
+bool pirbutton = 0;
 //--------------------------------------------------
-#define BUTTON_1 22 
+/*#define BUTTON_1 22 
 #define BUTTON_2 15
 #define BUTTON_3 4
 #define BUTTON_4 16
@@ -45,32 +30,34 @@ char pass[] = "ENTER_WIFI_PASSWORD";
 #define RELAY_1 27
 #define RELAY_2 26
 #define RELAY_3 25
-#define RELAY_4 33
+#define RELAY_4 33*/
 //--------------------------------------------------
 #define BUZZER  23
-#define TRIG    12
-#define ECHO    13
-#define PIR     14 //pir security button pin
+//#define TRIG    12
+//#define ECHO    13
+#define PIR     25 //pir security button pin
 #define MQ2     34
-#define DHT_PIN 19
-#define FLAME   21
+#define relay1 22   // GPIO22
+#define relay2 21   // GPIO21
+#define DHT_PIN 15
+//#define FLAME   21
 //--------------------------------------------------
-int STATE_RELAY_1 = 0;
+/*int STATE_RELAY_1 = 0;
 int STATE_RELAY_2 = 0;
 int STATE_RELAY_3 = 0;
-int STATE_RELAY_4 = 0;
+int STATE_RELAY_4 = 0;*/
 //--------------------------------------------------
+BLYNK_WRITE(V0) {
+  pirbutton = param.asInt();
+}
 //Change the virtual pins according the rooms
-#define VPIN_BUTTON_1     V0
-#define VPIN_BUTTON_2     V1
-#define VPIN_BUTTON_3     V2 
-#define VPIN_BUTTON_4     V3
-#define VPIN_PIR          V4
-#define VPIN_TEMPERATURE  V5
-#define VPIN_HUMIDITY     V6
-#define VPIN_ULTRASONIC   V7
-#define VPIN_MQ2          V8
-#define VPIN_FLAME        V9
+//#define VPIN_BUTTON_1     V0
+//#define VPIN_PIR          V4
+#define VPIN_TEMPERATURE  V2
+#define VPIN_HUMIDITY     V3
+//#define VPIN_ULTRASONIC   V7
+#define VPIN_MQ2          V1
+//#define VPIN_FLAME        V9
 //------------------------------------------------------
 boolean pir_new     = LOW;  // current state of pin
 boolean pir_old     = LOW;  // previous state of pin
@@ -96,31 +83,23 @@ String pir_event  = "ENTER_EVENT_CODE";
 boolean buzzer_state = false;
 unsigned long buzzer_timer = 0;
 //------------------------------------------------------
-bool PIR_BUTTON = 0;
 int tank_height = 50; //in centimeter
 int mq2_limit   = 55;
 int temp_limit  = 50;
 //------------------------------------------------------
 #include <DHT.h>
-#define DHTTYPE DHT11
+#define DHTTYPE DHT22
 DHT dht(DHT_PIN, DHTTYPE);
 //------------------------------------------------------
-#include <IRremote.h>
-const byte IR_RECEIVE_PIN = 18;
 //------------------------------------------------------
 //--------------------------------------------------------------------------
 // This function is called every time the device is connected 
 //to the Blynk.Cloud Request the latest state from the server
 BLYNK_CONNECTED() {
-  Blynk.syncVirtual(VPIN_BUTTON_1);
-  Blynk.syncVirtual(VPIN_BUTTON_2);
-  Blynk.syncVirtual(VPIN_BUTTON_3);
-  Blynk.syncVirtual(VPIN_BUTTON_4);
-  Blynk.syncVirtual(VPIN_PIR);
-  //Blynk.syncAll();
+ Blynk.syncAll();
 }
 //--------------------------------------------------------------------------
-// This function is called every time the Virtual Pin state change
+/*// This function is called every time the Virtual Pin state change
 //i.e when web push switch from Blynk App or Web Dashboard
 BLYNK_WRITE(VPIN_BUTTON_1) {
   STATE_RELAY_1 = param.asInt();
@@ -147,11 +126,11 @@ BLYNK_WRITE(VPIN_BUTTON_4) {
 }
 //--------------------------------------------------------------------------
 BLYNK_WRITE(VPIN_PIR) {
-  PIR_BUTTON = param.asInt();
-  Serial.print("PIR Button = "); Serial.println(PIR_BUTTON);
+  pirbutton = param.asInt();
+  Serial.print("PIR Button = "); Serial.println(pirbutton);
 }
 //--------------------------------------------------------------------------
-
+*/
 /****************************************************************************************************
  * setup() Function
 *****************************************************************************************************/
@@ -159,7 +138,7 @@ void setup(){
   // Debug console
   Serial.begin(115200);
   //--------------------------------------------------------------------
-  pinMode(BUTTON_1, INPUT_PULLUP);
+  /*pinMode(BUTTON_1, INPUT_PULLUP);
   pinMode(BUTTON_2, INPUT_PULLUP);
   pinMode(BUTTON_3, INPUT_PULLUP);
   pinMode(BUTTON_4, INPUT_PULLUP);
@@ -173,17 +152,21 @@ void setup(){
   digitalWrite(RELAY_1, HIGH);
   digitalWrite(RELAY_2, HIGH);
   digitalWrite(RELAY_3, HIGH);
-  digitalWrite(RELAY_4, HIGH);
+  digitalWrite(RELAY_4, HIGH);*/
   //--------------------------------------------------------------------
-  pinMode(FLAME, INPUT);
+  //pinMode(FLAME, INPUT);
   pinMode(PIR, INPUT);
-  pinMode(ECHO, INPUT);
-  pinMode(TRIG, OUTPUT);
+  //pinMode(ECHO, INPUT);
+  //pinMode(TRIG, OUTPUT);
   pinMode(BUZZER, OUTPUT);
+  pinMode(relay1, OUTPUT);
+  pinMode(relay2, OUTPUT);
+  digitalWrite(relay1, HIGH);
+  digitalWrite(relay2, HIGH);
   //--------------------------------------------------------------------
   dht.begin();
   //--------------------------------------------------------------------
-  IrReceiver.begin(IR_RECEIVE_PIN); // Start the IR receiver
+  //IrReceiver.begin(IR_RECEIVE_PIN); // Start the IR receiver
   //--------------------------------------------------------------------
   Blynk.begin(auth, ssid, pass);
   // You can also specify server:
@@ -196,10 +179,10 @@ void setup(){
   //Blynk.virtualWrite(VPIN_BUTTON_4, STATE_RELAY_4);
   //--------------------------------------------------------------------
   timer.setInterval(100L, MQ2GasSensor);
-  timer.setInterval(100L, DHT11Sensor);
+  timer.setInterval(100L, DHT22Sensor);
   timer.setInterval(100L, PirSensor);
-  timer.setInterval(100L, UltrasonicSensor);
-  timer.setInterval(100L, FlameSensor);
+  //timer.setInterval(100L, UltrasonicSensor);
+  //timer.setInterval(100L, FlameSensor);
 }
 
 /****************************************************************************************************
@@ -212,8 +195,8 @@ void loop() {
   // Check other examples on how to communicate with Blynk. Remember
   // to avoid delay() function!
   
-  listen_push_buttons();
-  listen_ir();
+  //listen_push_buttons();
+  //listen_ir();
   
   if (buzzer_state == true) {
     if (millis() - buzzer_timer > 5000) {
@@ -226,9 +209,9 @@ void loop() {
 }
 
 /****************************************************************************************************
- * DHT11Sensor Function
+ * DHT22Sensor Function
 *****************************************************************************************************/
-void DHT11Sensor() {
+void DHT22Sensor() {
   //-----------------------------------------------------------------------
   //Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   float h = dht.readHumidity();
@@ -267,7 +250,7 @@ void DHT11Sensor() {
  * PirSensor Function
 *****************************************************************************************************/
 void PirSensor() {
-  if (PIR_BUTTON == 1) {
+  if (pirbutton == 1) {
     pir_old = pir_new; // store old state
     pir_new = digitalRead(PIR); //read new state
     //------------------------------------------------------------------------
@@ -280,10 +263,10 @@ void PirSensor() {
       buzzer_timer = millis();
     }
     //------------------------------------------------------------------------
-    //else if(pir_old == HIGH && pir_new == LOW) { //HIGH to LOW
-      //Serial.println("Motion stopped!");
-      //digitalWrite(BUZZER, LOW);
-    //}
+    else if(pir_old == HIGH && pir_new == LOW) { //HIGH to LOW
+      Serial.println("Motion stopped!");
+      digitalWrite(BUZZER, LOW);
+    }
     //------------------------------------------------------------------------
   }
 }
@@ -315,109 +298,22 @@ void MQ2GasSensor() {
   Blynk.virtualWrite(VPIN_MQ2, mq2_new);
 }
 
-/****************************************************************************************************
- * FlameSensor Function
-*****************************************************************************************************/
-void FlameSensor() {
-  //--------------------------------------------------------------
-  flame_old = flame_new; // store old state
-  flame_new = digitalRead(FLAME); //read new state
-  //--------------------------------------------------------------
-  if(flame_old == HIGH && flame_new == LOW) { //HIGH to LOW
-    String text = "Fire is detected";
-    Serial.println(text);
-    Blynk.logEvent(fire_event, text);
-    digitalWrite(BUZZER, HIGH);
-    buzzer_state = true;
-    buzzer_timer = millis();
+   // Get buttons values
+BLYNK_WRITE(V5) {
+  bool RelayOne = param.asInt();
+  if (RelayOne == 1) {
+    digitalWrite(relay1, LOW);
+  } else {
+    digitalWrite(relay1, HIGH);
   }
-  //--------------------------------------------------------------
-  //else if(flame_old == LOW && flame_new == HIGH) { //LOW to HIGH
-    //Serial.println("Fire stopped!");
-    //digitalWrite(BUZZER, LOW);
-  //}
-  //--------------------------------------------------------------
-  Blynk.virtualWrite(VPIN_FLAME, !flame_new);
-  //--------------------------------------------------------------
 }
 
-/****************************************************************************************************
- * UltrasonicSensor Function
-*****************************************************************************************************/
-void UltrasonicSensor() {
-  //--------------------------------------------------
-  digitalWrite(TRIG, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG, LOW);
-  //--------------------------------------------------
-  long t = pulseIn(ECHO, HIGH);
-  long cm = (t * 0.034) / 2; //SOUND_SPEED = 0.034 i.e. 343m/s
-  //--------------------------------------------------
-  if(cm <= tank_height)
-    {Blynk.virtualWrite(VPIN_ULTRASONIC, tank_height-cm);}
-  //--------------------------------------------------
-  //Serial.print("Water Level:"); Serial.println(cm);
-  //--------------------------------------------------
-}
-
-/****************************************************************************************************
- * listen_push_buttons() function
-*****************************************************************************************************/
-void listen_push_buttons(){
-    //-----------------------------------------------------
-    if(digitalRead(BUTTON_1) == LOW)
-      {ControlRelay(1, RELAY_1, STATE_RELAY_1, VPIN_BUTTON_1);}
-    //-----------------------------------------------------
-    else if (digitalRead(BUTTON_2) == LOW)
-      {ControlRelay(2, RELAY_2, STATE_RELAY_2, VPIN_BUTTON_2);}
-    //-----------------------------------------------------
-    else if (digitalRead(BUTTON_3) == LOW)
-      {ControlRelay(3, RELAY_3, STATE_RELAY_3, VPIN_BUTTON_3);}
-    //-----------------------------------------------------
-    else if (digitalRead(BUTTON_4) == LOW)
-      {ControlRelay(4, RELAY_4, STATE_RELAY_4, VPIN_BUTTON_4);}
-    //-----------------------------------------------------
-}
-
-/****************************************************************************************************
- * ControlRelay Function
-*****************************************************************************************************/
-void ControlRelay(int number, int relay_pin, int &status, int virtual_pin){
-    delay(200);
-    status = !status;
-    digitalWrite(relay_pin, status);
-    delay(50);
-    Blynk.virtualWrite(virtual_pin, status); //update button state
-    Serial.print("Relay"+String(number)+" State = "); Serial.println(status);
-}
-
-/****************************************************************************************************
- * listen_ir Function
-*****************************************************************************************************/
-void listen_ir()
-{
-   if (IrReceiver.decode()) {
-      String ir_code = String(IrReceiver.decodedIRData.command, HEX);
-      if(ir_code.equals("0")) {IrReceiver.resume();return; }
-      
-      Serial.println(ir_code);
-      
-      if     (ir_code == "c")
-        {ControlRelay(1, RELAY_1, STATE_RELAY_1, VPIN_BUTTON_1);}
-      else if(ir_code == "18")
-        {ControlRelay(2, RELAY_2, STATE_RELAY_2, VPIN_BUTTON_2);}
-      else if(ir_code == "5e")
-        {ControlRelay(3, RELAY_3, STATE_RELAY_3, VPIN_BUTTON_3);}
-      else if(ir_code == "8")
-        {ControlRelay(4, RELAY_4, STATE_RELAY_4, VPIN_BUTTON_4);}
-      else if(ir_code == "d"){
-        PIR_BUTTON = !PIR_BUTTON;
-        Blynk.virtualWrite(VPIN_PIR, PIR_BUTTON); //update button state
-        Serial.print("Security Button State = "); Serial.println(PIR_BUTTON);
-      }
-        
-      IrReceiver.resume();
-   }
+// Get buttons values
+BLYNK_WRITE(V4) {
+  bool RelayTwo = param.asInt();
+  if (RelayTwo == 1) {
+    digitalWrite(relay2, LOW);
+  } else {
+    digitalWrite(relay2, HIGH);
+  }
 }
